@@ -1,0 +1,67 @@
+
+
+# This is for a setup for a uwsgi not behind a web server
+[uwsgi]
+http-socket = 127.0.0.1:5000
+chdir = scripts/
+plugin = python3
+wsgi-file = uwsgi_run.py
+callable = app
+master = true
+Tenable-threads = true
+process = 4
+threads = 2
+
+# This is a setup for a uwsig beind nginx (no .sock)
+# NOTE:
+# uwsgi + flask + hola in venv
+# Was run using 'ven run -- uwsgi --ini this_file.ini 
+# Paths relavtive to where you are running the venv
+[uwsgi]
+socket = 127.0.0.1:5000
+chdir = scripts/
+plugin = python3
+manage-script-name = true
+mount =/hola=uwsgi_run.py
+callable = app
+master = true
+enable-threads = true
+process = 4
+threads = 2
+
+####### USE THIS ######
+# This set up uses unix sockets 
+# NOTE:
+# uwsgi + flask + hola in venv
+# Was run using 'ven run -- uwsgi --ini this_file.ini 
+# Paths relavtive to where you are running the venv
+[uwsgi]
+socket = /tmp/hola.sock
+chmod-socket = 666
+chdir = scripts/
+plugin = python3
+manage-script-name = true
+mount =/hola=uwsgi_run.py
+callable = app
+master = true
+enable-threads = true
+process = 4
+threads = 2
+
+### NGINX SETUP:
+
+location /dtc_api/ {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/hola.sock;
+        #uwsgi_pass 127.0.0.1:5000;
+}
+
+#### Supervisor set up
+
+[program:hola]                                                          
+directory = /home/simon/dev                                              
+command = /home/simon/dev/.venv/bin/uwsgi --ini /home/simon/dev/hola.ini
+autostart = true                                                         
+autorestart = true                                                       
+stdout_logfile = /var/log/hola/stdout.log                               
+stderr_logfile = /var/log/hola/stderr.log   

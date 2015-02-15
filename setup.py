@@ -14,7 +14,8 @@ setup(
             'hola = hola.__main__:main'
         }
     },
-    install_require={
+    install_requires={
         'flask',
+        'logbook',
     }
 )
